@@ -7,12 +7,14 @@ public class Fighter : MonoBehaviour {
 
     [SerializeField] private float horizontalSpeed = .05f;
 
-    private int health = 100;
+    [SerializeField] private Rigidbody2D rigidbody2D;
+    [SerializeField] private SpriteRenderer health_sr;
+
+    private int health = 25;
     private bool isAttacking = false;
-    private Rigidbody2D rigidbody2D;
     private int id;
     private string controlPostFix;
-
+    private float maxHealthSRWidth;
 
 	// Use this for initialization
 	void Start () {
@@ -20,12 +22,19 @@ public class Fighter : MonoBehaviour {
         controlPostFix = string.Format("_P{0}", id+1);
         name = string.Format("Fighter_{0}", id+1);
 
-        rigidbody2D = GetComponent<Rigidbody2D>();
+        if (rigidbody2D.Equals(null))
+            rigidbody2D = GetComponent<Rigidbody2D>();
+
+        if (health_sr.Equals(null))
+            health_sr = transform.Find("Green").GetComponent<SpriteRenderer>();
+
+        maxHealthSRWidth = health_sr.size.x;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         CheckInput();
+        CheckHealth();
 	}
 
     void CheckInput() {
@@ -38,6 +47,10 @@ public class Fighter : MonoBehaviour {
         } else {
             isAttacking = false;
         }
+    }
+
+    void CheckHealth() {
+        health_sr.size = new Vector2(maxHealthSRWidth / 100 * health, health_sr.size.y);
     }
 
     private float GetAxis(string axisName) {
