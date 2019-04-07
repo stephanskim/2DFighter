@@ -5,18 +5,22 @@ using UnityEngine;
 
 public class Fighter : MonoBehaviour {
 
+    [SerializeField] private float horizontalSpeed = .05f;
+
     private int health = 100;
     private bool isAttacking = false;
-    private float horizontalSpeed = .05f;
-    private float horizTimer = 0;
-
+    private Rigidbody2D rigidbody2D;
     private int id;
     private string controlPostFix;
+
 
 	// Use this for initialization
 	void Start () {
         id = transform.GetSiblingIndex();
         controlPostFix = string.Format("_P{0}", id+1);
+        name = string.Format("Fighter_{0}", id+1);
+
+        rigidbody2D = GetComponent<Rigidbody2D>();
 	}
 	
 	// Update is called once per frame
@@ -26,10 +30,14 @@ public class Fighter : MonoBehaviour {
 
     void CheckInput() {
         if(GetButton("Horizontal")) {
-            transform.position += Vector3.ClampMagnitude(Vector3.right * GetAxis("Horizontal"), horizontalSpeed);
+            rigidbody2D.MovePosition(rigidbody2D.position + Vector2.ClampMagnitude(Vector3.right * GetAxis("Horizontal"), horizontalSpeed));
         }
 
-
+        if(GetButton("Fire1")) {
+            isAttacking = true;
+        } else {
+            isAttacking = false;
+        }
     }
 
     private float GetAxis(string axisName) {
