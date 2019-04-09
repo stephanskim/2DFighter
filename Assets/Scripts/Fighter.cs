@@ -10,14 +10,16 @@ public class Fighter : MonoBehaviour {
     [SerializeField] private Rigidbody2D rigidbody2D;
     [SerializeField] private SpriteRenderer health_sr;
 
+    private int id;
+
     private int health = 25;
+    private float maxHealthSRWidth;
     private bool isAttacking = false;
     private bool isJumping = false;
-    private int id;
-    private string controlPostFix;
-    private float maxHealthSRWidth;
 
-	// Use this for initialization
+    private string controlPostFix;
+
+	// Initilization
 	void Start () {
         id = transform.GetSiblingIndex();
         controlPostFix = string.Format("_P{0}", id+1);
@@ -38,6 +40,7 @@ public class Fighter : MonoBehaviour {
         CheckHealth();
 	}
 
+    // Check Input for each control on this fighter
     void CheckInput() {
         if(GetButton("Horizontal")) {
             if (GetAxis("Horizontal") > 0)
@@ -60,14 +63,25 @@ public class Fighter : MonoBehaviour {
         }
     }
 
+    // Check Health and update health bar
     void CheckHealth() {
         health_sr.size = new Vector2(maxHealthSRWidth / 100 * health, health_sr.size.y);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision) {
+    void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.CompareTag("Platform")) {
             isJumping = false;
         }
+
+        if (collision.gameObject.CompareTag("Fighter") &&
+            isAttacking) {
+            Fighter otherFighter = collision.gameObject.GetComponent<Fighter>();
+            otherFighter.Damage(5);
+        }
+    }
+
+    public void Damage(int damageAmount) {
+        health -= damageAmount;
     }
 
     private float GetAxis(string axisName) {
@@ -81,5 +95,4 @@ public class Fighter : MonoBehaviour {
     private string GetControlString(String controlName) {
         return controlName + controlPostFix;
     }
-
 }
