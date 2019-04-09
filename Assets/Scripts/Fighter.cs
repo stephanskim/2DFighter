@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class Fighter : MonoBehaviour {
 
-    [SerializeField] private float horizontalSpeed = .05f;
-
+    [SerializeField] private float horizontalSpeed = 5f;
+    [SerializeField] private float jumpSpeed = 10f;
     [SerializeField] private Rigidbody2D rigidbody2D;
     [SerializeField] private SpriteRenderer health_sr;
 
     private int health = 25;
     private bool isAttacking = false;
+    private bool isJumping = false;
     private int id;
     private string controlPostFix;
     private float maxHealthSRWidth;
@@ -39,7 +40,14 @@ public class Fighter : MonoBehaviour {
 
     void CheckInput() {
         if(GetButton("Horizontal")) {
-            rigidbody2D.MovePosition(rigidbody2D.position + Vector2.ClampMagnitude(Vector3.right * GetAxis("Horizontal"), horizontalSpeed));
+            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity + Vector2.right * GetAxis("Horizontal"), horizontalSpeed);
+        } else {
+            rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
+        }
+
+        if(GetButton("Jump") && !isJumping) {
+            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity + Vector2.up * jumpSpeed, jumpSpeed);
+            isJumping = true;
         }
 
         if(GetButton("Fire1")) {
@@ -51,6 +59,12 @@ public class Fighter : MonoBehaviour {
 
     void CheckHealth() {
         health_sr.size = new Vector2(maxHealthSRWidth / 100 * health, health_sr.size.y);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision) {
+        if (collision.gameObject.CompareTag("Platform")) {
+            isJumping = false;
+        }
     }
 
     private float GetAxis(string axisName) {
