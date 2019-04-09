@@ -40,13 +40,16 @@ public class Fighter : MonoBehaviour {
 
     void CheckInput() {
         if(GetButton("Horizontal")) {
-            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity + Vector2.right * GetAxis("Horizontal"), horizontalSpeed);
+            if (GetAxis("Horizontal") > 0)
+                rigidbody2D.velocity = new Vector2(horizontalSpeed, rigidbody2D.velocity.y);
+            else
+                rigidbody2D.velocity = new Vector2(-horizontalSpeed, rigidbody2D.velocity.y);
         } else {
             rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
         }
 
         if(GetButton("Jump") && !isJumping) {
-            rigidbody2D.velocity = Vector2.ClampMagnitude(rigidbody2D.velocity + Vector2.up * jumpSpeed, jumpSpeed);
+            rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpSpeed);
             isJumping = true;
         }
 
