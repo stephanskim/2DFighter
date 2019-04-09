@@ -65,6 +65,10 @@ public class Fighter : MonoBehaviour {
 
     // Check Health and update health bar
     void CheckHealth() {
+        if (health <= 0) {
+            gameObject.SetActive(false);
+        }
+
         health_sr.size = new Vector2(maxHealthSRWidth / 100 * health, health_sr.size.y);
     }
 
