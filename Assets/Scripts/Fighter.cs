@@ -7,20 +7,30 @@ public class Fighter : MonoBehaviour {
 
     [SerializeField] private float horizontalSpeed = 5f;
     [SerializeField] private float jumpSpeed = 10f;
+    [SerializeField] private float maxAttackTime = 1f;
+
     [SerializeField] private Rigidbody2D rigidbody2D;
     [SerializeField] private SpriteRenderer health_sr;
+    [SerializeField] private Animator animator;
 
     private int id;
 
     private int health = 25;
+    private float attackTimer = 0f;
     private float maxHealthSRWidth;
     private bool isAttacking = false;
     private bool isJumping = false;
 
     private string controlPostFix;
 
-	// Initilization
-	void Start () {
+    public bool IsAttacking {
+        get {
+            return isAttacking;
+        }
+    }
+
+    // Initilization
+    void Start () {
         id = transform.GetSiblingIndex();
         controlPostFix = string.Format("_P{0}", id+1);
         name = string.Format("Fighter_{0}", id+1);
@@ -40,15 +50,27 @@ public class Fighter : MonoBehaviour {
         CheckHealth();
 	}
 
+    // Updates once every 1s/60
+    void FixedUpdate() {
+        
+    }
+
     // Check Input for each control on this fighter
     void CheckInput() {
         if(GetButton("Horizontal")) {
-            if (GetAxis("Horizontal") > 0)
+            if (GetAxis("Horizontal") > 0) {
                 rigidbody2D.velocity = new Vector2(horizontalSpeed, rigidbody2D.velocity.y);
-            else
+                transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            }
+            else {
                 rigidbody2D.velocity = new Vector2(-horizontalSpeed, rigidbody2D.velocity.y);
+                transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * -1, transform.localScale.y, transform.localScale.z);
+            }
+            animator.SetBool("move", true);
         } else {
             rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
+
+            animator.SetBool("move", false);
         }
 
         if(GetButton("Jump") && !isJumping) {
@@ -56,10 +78,9 @@ public class Fighter : MonoBehaviour {
             isJumping = true;
         }
 
-        if(GetButton("Fire1")) {
+        if (GetButton("Fire1") && attackTimer == 0) {
+            attackTimer = 1f;
             isAttacking = true;
-        } else {
-            isAttacking = false;
         }
     }
 
@@ -78,14 +99,9 @@ public class Fighter : MonoBehaviour {
         }
 
         if (collision.gameObject.CompareTag("Fighter") &&
-            isAttacking) {
-            Fighter otherFighter = collision.gameObject.GetComponent<Fighter>();
-            otherFighter.Damage(5);
+            collision.gameObject.GetComponent<Fighter>().IsAttacking) {
+            health -= 5;
         }
-    }
-
-    public void Damage(int damageAmount) {
-        health -= damageAmount;
     }
 
     private float GetAxis(string axisName) {
